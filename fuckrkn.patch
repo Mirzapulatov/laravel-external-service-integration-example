@@ -1,0 +1,290 @@
+diff --git a/fluxer_desktop/build_resources/entitlements.mac.stable.plist b/fluxer_desktop/build_resources/entitlements.mac.stable.plist
+index 11f159a..ca6f3da 100644
+--- a/fluxer_desktop/build_resources/entitlements.mac.stable.plist
++++ b/fluxer_desktop/build_resources/entitlements.mac.stable.plist
+@@ -21,12 +21,5 @@
+     <true/>
+     <key>com.apple.security.network.server</key>
+     <true/>
+-    <key>com.apple.application-identifier</key>
+-    <string>3G5837T29K.app.fluxer</string>
+-    <key>com.apple.developer.associated-domains</key>
+-    <array>
+-        <string>webcredentials:fluxer.app</string>
+-        <string>webcredentials:web.fluxer.app</string>
+-    </array>
+ </dict>
+ </plist>
+diff --git a/fluxer_desktop/electron-builder.config.cjs b/fluxer_desktop/electron-builder.config.cjs
+index 4ec31a3..25584c7 100644
+--- a/fluxer_desktop/electron-builder.config.cjs
++++ b/fluxer_desktop/electron-builder.config.cjs
+@@ -7,11 +7,11 @@ const os = require('node:os');
+ const path = require('node:path');
+ const {promisify} = require('node:util');
+ const execFileAsync = promisify(execFile);
+-const productName = isCanary ? 'Fluxer Canary' : 'Fluxer';
+-const appId = isCanary ? 'app.fluxer.canary' : 'app.fluxer';
++const productName = 'FuckRKN';
++const appId = 'ru.animatch.fuckrkn';
+ const iconDir = isCanary ? 'icons-canary' : 'icons-stable';
+-const packageName = isCanary ? 'fluxer_desktop_canary' : 'fluxer_desktop';
+-const linuxPackageName = isCanary ? 'fluxer-canary' : 'fluxer';
++const packageName = 'fuckrkn_desktop';
++const linuxPackageName = 'fuckrkn';
+ const desktopBuildVariant = process.env.FLUXER_DESKTOP_BUILD_VARIANT || process.env.DESKTOP_VARIANT || 'default';
+ const windowsGameCaptureModuleEnabled =
+ 	desktopBuildVariant === 'windows-game-capture' || process.env.FLUXER_WINDOWS_GAME_CAPTURE_MODULE_ENABLED === 'true';
+@@ -312,6 +312,10 @@ const windowsGameCapturePackageExcludes = !windowsGameCaptureModuleEnabled
+ 	? ['!node_modules/@fluxer/win-game-capture/**/*', '!node_modules/.pnpm/@fluxer+win-game-capture@*/**/*']
+ 	: [];
+ const platformNativeRuntimeExcludes = platformNativeExcludes(targetPlatform, targetNativeArch);
++const nonTargetDarwinNativeArtifactExcludes =
++	targetPlatform === 'darwin' && targetNativeArch
++		? [`!node_modules/**/*.darwin-${targetNativeArch === 'arm64' ? 'x64' : 'arm64'}.node`]
++		: [];
+ const platformRuntimeDependencyExcludes =
+ 	targetPlatform === 'darwin'
+ 		? []
+@@ -1051,7 +1055,7 @@ async function verifyLinuxArtifactContracts(buildResult) {
+ module.exports = {
+ 	appId,
+ 	productName,
+-	copyright: 'Copyright © 2026 Fluxer Platform AB',
++	copyright: 'Copyright © 2026 AniMatch',
+ 	// biome-ignore lint/suspicious/noTemplateCurlyInString: electron-builder placeholders, not JS template literals.
+ 	artifactName: '${productName}-${version}-${os}-${arch}.${ext}',
+ 	directories: {
+@@ -1068,6 +1072,7 @@ module.exports = {
+ 		...bundledDependencyExcludes,
+ 		...windowsGameCapturePackageExcludes,
+ 		...platformNativeRuntimeExcludes,
++		...nonTargetDarwinNativeArtifactExcludes,
+ 		...platformRuntimeDependencyExcludes,
+ 	],
+ 	extraMetadata: {
+@@ -1185,12 +1190,12 @@ module.exports = {
+ 	mac: {
+ 		category: 'public.app-category.social-networking',
+ 		minimumSystemVersion: macOSMinimumSystemVersion,
++		identity: '-',
+ 		icon: `build_resources/${iconDir}/_compiled/AppIcon.icns`,
+ 		darkModeSupport: true,
+-		hardenedRuntime: true,
++		hardenedRuntime: false,
+ 		gatekeeperAssess: false,
+-		notarize: true,
+-		provisioningProfile,
++		notarize: false,
+ 		entitlements: isCanary
+ 			? 'build_resources/entitlements.mac.canary.plist'
+ 			: 'build_resources/entitlements.mac.stable.plist',
+@@ -1206,11 +1211,11 @@ module.exports = {
+ 			},
+ 		],
+ 		extendInfo: {
+-			NSMicrophoneUsageDescription: 'Fluxer needs access to your microphone to enable voice chat features.',
+-			NSCameraUsageDescription: 'Fluxer needs access to your camera to enable video chat features.',
+-			NSAppleEventsUsageDescription: 'Fluxer needs access to Apple Events for automation features.',
+-			NSAudioCaptureUsageDescription: 'Fluxer captures audio from the screen or window you choose to share.',
+-			NSScreenCaptureUsageDescription: 'Fluxer captures the screen or window you choose to share.',
++			NSMicrophoneUsageDescription: 'FuckRKN needs access to your microphone for voice chat.',
++			NSCameraUsageDescription: 'FuckRKN needs access to your camera for video chat.',
++			NSAppleEventsUsageDescription: 'FuckRKN needs access to Apple Events for automation features.',
++			NSAudioCaptureUsageDescription: 'FuckRKN captures audio from the screen or window you choose to share.',
++			NSScreenCaptureUsageDescription: 'FuckRKN captures the screen or window you choose to share.',
+ 		},
+ 	},
+ 	dmg: {
+@@ -1228,7 +1233,7 @@ module.exports = {
+ 		],
+ 	},
+ 	win: {
+-		icon: `build_resources/${iconDir}/icon.ico`,
++		icon: `build_resources/${iconDir}/icon.png`,
+ 		target: winTargets,
+ 	},
+ 	portable: {
+diff --git a/fluxer_desktop/src/common/Constants.ts b/fluxer_desktop/src/common/Constants.ts
+index 5a95ece..581fbec 100644
+--- a/fluxer_desktop/src/common/Constants.ts
++++ b/fluxer_desktop/src/common/Constants.ts
+@@ -1,8 +1,8 @@
+ // SPDX-License-Identifier: AGPL-3.0-or-later
+ 
+ export const APP_PROTOCOL = 'fluxer';
+-export const STABLE_APP_URL = 'https://web.fluxer.app';
+-export const CANARY_APP_URL = 'https://web.canary.fluxer.app';
++export const STABLE_APP_URL = 'https://discord.animatch.ru';
++export const CANARY_APP_URL = 'https://discord.animatch.ru';
+ export const DEFAULT_WINDOW_WIDTH = 1280;
+ export const DEFAULT_WINDOW_HEIGHT = 800;
+ export const MIN_WINDOW_WIDTH = 800;
+diff --git a/fluxer_desktop/src/common/DesktopIdentity.ts b/fluxer_desktop/src/common/DesktopIdentity.ts
+index 0ededef..ed80004 100644
+--- a/fluxer_desktop/src/common/DesktopIdentity.ts
++++ b/fluxer_desktop/src/common/DesktopIdentity.ts
+@@ -2,12 +2,12 @@
+ 
+ import {BUILD_CHANNEL} from '@electron/common/BuildChannel';
+ 
+-export const DESKTOP_APP_NAME = BUILD_CHANNEL === 'canary' ? 'Fluxer Canary' : 'Fluxer';
+-export const MACOS_BUNDLE_ID = BUILD_CHANNEL === 'canary' ? 'app.fluxer.canary' : 'app.fluxer';
+-export const LINUX_DESKTOP_ENTRY_ID = BUILD_CHANNEL === 'canary' ? 'fluxer-canary' : 'fluxer';
+-export const WINDOWS_SHORTCUT_AUTHOR = 'Fluxer Platform AB';
+-const WINDOWS_VELOPACK_ID = BUILD_CHANNEL === 'canary' ? 'fluxer_desktop_canary' : 'fluxer_desktop';
+-export const WINDOWS_APP_USER_MODEL_ID = BUILD_CHANNEL === 'canary' ? 'Fluxer.Fluxer.Canary' : 'Fluxer.Fluxer';
++export const DESKTOP_APP_NAME = 'FuckRKN';
++export const MACOS_BUNDLE_ID = 'ru.animatch.fuckrkn';
++export const LINUX_DESKTOP_ENTRY_ID = 'fuckrkn';
++export const WINDOWS_SHORTCUT_AUTHOR = 'AniMatch';
++const WINDOWS_VELOPACK_ID = 'fuckrkn_desktop';
++export const WINDOWS_APP_USER_MODEL_ID = 'AniMatch.FuckRKN';
+ export const WINDOWS_LEGACY_APP_USER_MODEL_IDS = [`velopack.${WINDOWS_VELOPACK_ID}`];
+ export const WINDOWS_TOAST_ACTIVATOR_CLSID =
+ 	BUILD_CHANNEL === 'canary' ? '{9CEDB5C0-3552-43B0-A279-2232E0CDF74C}' : '{48EEF21B-F3AE-431E-8CF2-386FFB2143F2}';
+diff --git a/fluxer_desktop/src/common/UserDataPath.ts b/fluxer_desktop/src/common/UserDataPath.ts
+index 0c65b81..47171c6 100644
+--- a/fluxer_desktop/src/common/UserDataPath.ts
++++ b/fluxer_desktop/src/common/UserDataPath.ts
+@@ -18,8 +18,8 @@ interface ChannelStorageDirectoryMap {
+ }
+ 
+ const channelStorageDirectoryMap: ChannelStorageDirectoryMap = {
+-	stable: 'fluxer',
+-	canary: 'fluxercanary',
++	stable: 'fuckrkn',
++	canary: 'fuckrkn-canary',
+ };
+ 
+ let portableMode = false;
+diff --git a/fluxer_desktop/src/main/DesktopTray.ts b/fluxer_desktop/src/main/DesktopTray.ts
+index edb6f72..8bb2e37 100644
+--- a/fluxer_desktop/src/main/DesktopTray.ts
++++ b/fluxer_desktop/src/main/DesktopTray.ts
+@@ -5,6 +5,7 @@ import path from 'node:path';
+ import {fileURLToPath} from 'node:url';
+ import {BUILD_CHANNEL} from '@electron/common/BuildChannel';
+ import {getDesktopWindowBehaviorSettings} from '@electron/common/DesktopConfig';
++import {DESKTOP_APP_NAME} from '@electron/common/DesktopIdentity';
+ import {createChildLogger} from '@electron/common/Logger';
+ import type {
+ 	TrayPresenceStatus as SharedTrayPresenceStatus,
+@@ -18,7 +19,7 @@ import {app, type BrowserWindow, clipboard, Menu, nativeImage, Tray} from 'elect
+ const __dirname = path.dirname(fileURLToPath(import.meta.url));
+ const logger = createChildLogger('DesktopTray');
+ const isCanary = BUILD_CHANNEL === 'canary';
+-const APP_NAME = isCanary ? 'Fluxer Canary' : 'Fluxer';
++const APP_NAME = DESKTOP_APP_NAME;
+ const ICON_DIR_NAME = isCanary ? 'icons-canary' : 'icons-stable';
+ const TRAY_POSITION_GUID = isCanary ? '1a39981b-b4cc-46a4-8f7e-9fce187110f5' : '11c70c9f-a35d-4328-9040-f722dc5fa0a0';
+ 
+diff --git a/fluxer_desktop/src/main/Menu.ts b/fluxer_desktop/src/main/Menu.ts
+index b2efc9b..48e5d53 100644
+--- a/fluxer_desktop/src/main/Menu.ts
++++ b/fluxer_desktop/src/main/Menu.ts
+@@ -1,6 +1,6 @@
+ // SPDX-License-Identifier: AGPL-3.0-or-later
+ 
+-import {BUILD_CHANNEL} from '@electron/common/BuildChannel';
++import {DESKTOP_APP_NAME} from '@electron/common/DesktopIdentity';
+ import {onLocaleChange, t} from '@electron/main/MainI18n';
+ import {openExternalDeduped} from '@electron/main/OpenExternal';
+ import {buildTroubleshootingMenuItems} from '@electron/main/Troubleshooting';
+@@ -10,8 +10,7 @@ import {type BaseWindow, BrowserWindow, Menu, type MenuItem, type MenuItemConstr
+ const MACOS_HELP_MENU_TITLE_AUTODETECT_OPT_OUT = '\u200C';
+ 
+ function buildTemplate(): Array<MenuItemConstructorOptions> {
+-	const isCanary = BUILD_CHANNEL === 'canary';
+-	const appName = isCanary ? 'Fluxer Canary' : 'Fluxer';
++	const appName = DESKTOP_APP_NAME;
+ 	const isMac = process.platform === 'darwin';
+ 	const template: Array<MenuItemConstructorOptions> = [];
+ 	if (isMac) {
+diff --git a/fluxer_desktop/src/main/Updater.ts b/fluxer_desktop/src/main/Updater.ts
+index 3d25b35..ce8468d 100644
+--- a/fluxer_desktop/src/main/Updater.ts
++++ b/fluxer_desktop/src/main/Updater.ts
+@@ -3,9 +3,7 @@
+ import {createRequire} from 'node:module';
+ import {BUILD_CHANNEL} from '@electron/common/BuildChannel';
+ import {DESKTOP_BUILD_VARIANT} from '@electron/common/BuildVariant';
+-import {isPortableMode} from '@electron/common/UserDataPath';
+ import {destroyDesktopTray} from '@electron/main/DesktopTray';
+-import {isFlatpakRuntime} from '@electron/main/LinuxSandbox';
+ import {setQuitting} from '@electron/main/Window';
+ import {app, autoUpdater, type BrowserWindow, ipcMain} from 'electron';
+ import log from 'electron-log';
+@@ -75,8 +73,7 @@ const UPDATE_API_ENDPOINT = BUILD_CHANNEL === 'canary' ? 'https://api.canary.flu
+ const UPDATE_VARIANT_SEGMENT =
+ 	process.platform === 'win32' && DESKTOP_BUILD_VARIANT !== 'default' ? `/${DESKTOP_BUILD_VARIANT}` : '';
+ const UPDATE_BASE_URL = `${UPDATE_API_ENDPOINT}/dl/desktop/${BUILD_CHANNEL}/${process.platform}/${DESKTOP_DOWNLOAD_ARCH}${UPDATE_VARIANT_SEGMENT}`;
+-const DOWNLOAD_PAGE_URL =
+-	BUILD_CHANNEL === 'canary' ? 'https://canary.fluxer.app/download' : 'https://fluxer.app/download';
++const DOWNLOAD_PAGE_URL = 'https://discord.animatch.ru/download/';
+ 
+ let lastContext: UpdaterContext = 'background';
+ let pendingVelopackUpdate: UpdateInfo | null = null;
+@@ -602,25 +599,5 @@ function registerManualUpdater(
+ }
+ 
+ export function registerUpdater(getMainWindow: () => BrowserWindow | null) {
+-	if (!app.isPackaged) {
+-		registerManualUpdater(getMainWindow, 'unpackaged');
+-		return;
+-	}
+-	if (isPortableMode()) {
+-		registerManualUpdater(getMainWindow, 'platform');
+-		return;
+-	}
+-	if (isFlatpakRuntime()) {
+-		registerManualUpdater(getMainWindow, 'managed-package');
+-		return;
+-	}
+-	if (process.platform === 'win32') {
+-		registerVelopackUpdater(getMainWindow);
+-		return;
+-	}
+-	if (process.platform === 'darwin') {
+-		registerElectronUpdater(getMainWindow);
+-		return;
+-	}
+ 	registerManualUpdater(getMainWindow, 'platform');
+ }
+diff --git a/tools/ci/src/desktop.rs b/tools/ci/src/desktop.rs
+index 46e2525..6562146 100644
+--- a/tools/ci/src/desktop.rs
++++ b/tools/ci/src/desktop.rs
+@@ -1594,13 +1594,13 @@ struct WindowsPackageConfig {
+ }
+ 
+ fn windows_package_config(build_channel: &str, arch: &str) -> WindowsPackageConfig {
+-    let canary = build_channel == "canary";
+-    let pack_title = if canary { "Fluxer Canary" } else { "Fluxer" };
+-    WindowsPackageConfig {
+-        pack_id: if canary {
+-            "fluxer_desktop_canary"
+-        } else {
+-            "fluxer_desktop"
++	let canary = build_channel == "canary";
++	let pack_title = if canary { "FuckRKN Canary" } else { "FuckRKN" };
++	WindowsPackageConfig {
++		pack_id: if canary {
++			"fuckrkn_desktop_canary"
++		} else {
++			"fuckrkn_desktop"
+         },
+         pack_title,
+         icon_dir: if canary {
+@@ -1646,8 +1646,8 @@ fn package_app_windows_velopack_step() -> Result<()> {
+         config.main_exe.as_str(),
+         "--packTitle",
+         config.pack_title,
+-        "--packAuthors",
+-        "Fluxer Platform AB",
++		"--packAuthors",
++		"AniMatch",
+         "--shortcuts",
+         "Desktop,StartMenu",
+         "--runtime",
+
